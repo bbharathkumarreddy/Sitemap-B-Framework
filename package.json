@@ -1,0 +1,37 @@
+{
+  "name": "sitemap-b-framework",
+  "version": "1.0.0",
+  "description": "Advanced Sitemap Management, Building, Deployment Framework",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "sitemap",
+    "sitemap-index",
+    "image-sitemap",
+    "video-sitemap",
+    "google-sitmap"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bbharathkumarreddy/Sitemap-B-Framework.git"
+  },
+  "author": "bbharathkumarreddy",
+  "license": "MIT",
+  "dependencies": {
+    "@google-cloud/storage": "^4.7.0",
+    "aws-sdk": "^2.668.0",
+    "body-parser": "^1.19.0",
+    "express": "^4.17.1",
+    "lodash": "^4.17.15",
+    "moment": "^2.25.0",
+    "node-cron": "^2.0.3",
+    "xmlbuilder2": "^2.1.2",
+    "zip-lib": "^0.5.0"
+  },
+  "bugs": {
+    "url": "https://github.com/bbharathkumarreddy/Sitemap-B-Framework/issues"
+  },
+  "homepage": "https://github.com/bbharathkumarreddy/Sitemap-B-Framework#readme"
+}
