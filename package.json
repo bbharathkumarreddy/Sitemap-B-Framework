@@ -11,7 +11,8 @@
     "sitemap-index",
     "image-sitemap",
     "video-sitemap",
-    "google-sitmap"
+    "google-sitmap",
+    "seo-sitemap"
   ],
   "repository": {
     "type": "git",
