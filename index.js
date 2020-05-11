@@ -12,8 +12,8 @@ class sitemapBFramework {
 
   async init(config) {
     this.config = config;
-    if (this.config.build.cron && !cron.validate(this.config.build.cron)) console.error('Invalid Build Cron Expression , Auto Build Will Not Trigger');
-    if (this.config.backup.cron && !cron.validate(this.config.backup.cron)) console.error('Invalid Backup Cron Expression , Auto Bakcup Will Not Trigger');
+    if (this.config.build && this.config.build.cron && !cron.validate(this.config.build.cron)) console.error('Invalid Build Cron Expression , Auto Build Will Not Trigger');
+    if (this.config.backup && this.config.backup.cron && !cron.validate(this.config.backup.cron)) console.error('Invalid Backup Cron Expression , Auto Bakcup Will Not Trigger');
     if (!this.config.maxLinksPerSitemap || parseInt(this.config.maxLinksPerSitemap) < 1 || parseInt(this.config.maxLinksPerSitemap) > 50000) this.config.maxLinksPerSitemap = 50000;
     if (!this.config.path) this.config.path = './';
     if (this.config.path.charAt(this.config.path.length - 1) != '/') this.config.path = this.config.path + '/';
@@ -284,7 +284,7 @@ class sitemapBFramework {
   }
 
   async DeployToBucket() {
-    if (this.config.build.deployToBucket) {
+    if (this.config.build && this.config.build.deployToBucket) {
       let modeArr = Object.keys(this.config.build.deployToBucket);
       if (modeArr.length < 1) return true;
       const mode = modeArr[0];
@@ -343,7 +343,7 @@ class sitemapBFramework {
   }
 
   async BackupToBucket() {
-    if (this.config.backup.bakcupToBucket) {
+    if (this.config.backup && this.config.backup.bakcupToBucket) {
       let modeArr = Object.keys(this.config.backup.bakcupToBucket);
       if (modeArr.length < 1) return true;
       const mode = modeArr[0];
