@@ -7,7 +7,7 @@ npm i sitemap-b-framework
 ```
 https://www.npmjs.com/package/sitemap-b-framework
 
-# Maintainers
+## Maintainers
 - [@bbharathkumarreddy](https://github.com/bbharathkumarreddy/)
 
 ## License
