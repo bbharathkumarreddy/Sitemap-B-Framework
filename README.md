@@ -19,10 +19,21 @@ https://www.npmjs.com/package/sitemap-b-framework
 ## Usage
 ### Simple Usage
 ```js
+var sitemapBFramework = require("../Sitemap-B-Framework/index");
+var SitemapBFramework = new sitemapBFramework();
 
+// sitemapItemAdd (loc , sitemapName @optional, lastmod @optional, changefreq @optional, priority @optional);
+const data = await SitemapBFramework.sitemapItemAdd('https://example.com');
+const data = await SitemapBFramework.sitemapBuildAndDeploy();
+
+// Sitemap XML will be generated at ./sitemap-xml/build folder;
 ```
 ### Advanced Usage
+```
 
+[Documentation Development In Progress, GA by june,2020 ]
+
+```
 
 ## Maintainers
 - [@bbharathkumarreddy](https://github.com/bbharathkumarreddy/)
@@ -31,4 +42,4 @@ https://www.npmjs.com/package/sitemap-b-framework
 
 See [LICENSE](https://github.com/bbharathkumarreddy/Sitemap-B-Framework/blob/master/LICENSE) file.
 
-Development In Progress [GA]
+Development In Progress [GA by june,2020 ]
