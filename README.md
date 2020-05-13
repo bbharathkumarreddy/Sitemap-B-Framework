@@ -1,5 +1,6 @@
 # Sitemap B Framework
 Advanced Sitemap Management, Building, Deployment Framework [Open Source]
+More info on sitemaps [here](https://support.google.com/webmasters/answer/156184?hl=en&ref_topic=4581190&visit_id=637249895675378920-943348363&rd=1)
 
 ## Installation
 ```sh
@@ -85,6 +86,7 @@ var SitemapBFramework = new sitemapBFramework(options);
  - Default path for framework data stored as json files at ./sitemap-config
  - Default path for lastest generated sitemap files are stored at ./sitemap-xml/build
  - Persistent storage requires for ./sitemap-config path for all operations
+ */
 ```
 ### Options Allowed
 ```js
@@ -178,8 +180,10 @@ const options = {
 ## Maintainers
 - [@bbharathkumarreddy](https://github.com/bbharathkumarreddy/)
 
+Contributors are welcome
+
 ## License
 
 See [LICENSE](https://github.com/bbharathkumarreddy/Sitemap-B-Framework/blob/master/LICENSE) file.
 
-Development In Progress [GA by june,2020 ]
+Development In Progress [GA by june,2020]

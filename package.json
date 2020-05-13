@@ -1,6 +1,6 @@
 {
   "name": "sitemap-b-framework",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Advanced Sitemap Management, Building, Deployment Framework",
   "main": "index.js",
   "scripts": {
@@ -34,6 +34,5 @@
   },
   "bugs": {
     "url": "https://github.com/bbharathkumarreddy/Sitemap-B-Framework/issues"
-  },
-  "homepage": "https://github.com/bbharathkumarreddy/Sitemap-B-Framework#readme"
+  }
 }
