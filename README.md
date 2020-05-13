@@ -87,7 +87,7 @@ var SitemapBFramework = new sitemapBFramework(options);
  - Persistent storage requires for ./sitemap-config path for all operations
 ```
 ### Options Allowed
-```json
+```js
 const options = {
   path: 'data/sitemap', // Persistent folder location, optional
   maxLinksPerSitemap: 15000, // Max of 50000 links allowed per sitemap file, optional
