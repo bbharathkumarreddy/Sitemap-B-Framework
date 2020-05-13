@@ -1,6 +1,6 @@
 {
   "name": "sitemap-b-framework",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "Advanced Sitemap Management, Building, Deployment Framework",
   "main": "index.js",
   "scripts": {
@@ -29,8 +29,7 @@
     "lodash": "^4.17.15",
     "moment": "^2.25.0",
     "node-cron": "^2.0.3",
-    "xmlbuilder2": "^2.1.2",
-    "zip-lib": "^0.5.0"
+    "xmlbuilder2": "^2.1.2"
   },
   "bugs": {
     "url": "https://github.com/bbharathkumarreddy/Sitemap-B-Framework/issues"
