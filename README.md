@@ -19,7 +19,7 @@ https://www.npmjs.com/package/sitemap-b-framework
 ## Usage
 ### Simple Usage
 ```js
-var sitemapBFramework = require("../Sitemap-B-Framework/index");
+var sitemapBFramework = require("sitemap-b-framework");
 var SitemapBFramework = new sitemapBFramework();
 
 // sitemapItemAdd (loc , sitemapName @optional, lastmod @optional, changefreq @optional, priority @optional);
