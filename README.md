@@ -1,5 +1,6 @@
 # Sitemap B Framework
 Advanced Sitemap Management, Building, Deployment Framework [Open Source]
+
 More info on sitemaps [here](https://support.google.com/webmasters/answer/156184?hl=en&ref_topic=4581190&visit_id=637249895675378920-943348363&rd=1)
 
 ## Installation
@@ -169,8 +170,10 @@ const options = {
  //sitemapGlobalSearch(loc)
  sitemapGlobalSearch('ttps://example.com/product/laptop-trending');
 
+
  //sitemapBuildAndDeploy()
  sitemapBuildAndDeploy();
+
 
  //BackupToBucket()
  BackupToBucket();
