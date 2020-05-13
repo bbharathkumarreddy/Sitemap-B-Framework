@@ -11,9 +11,9 @@ class sitemapBFramework {
   }
 
   async init(config) {
-    this.config = config;
-    if (this.config.build && this.config.build.cron && !cron.validate(this.config.build.cron)) console.error('Invalid Build Cron Expression , Auto Build Will Not Trigger');
-    if (this.config.backup && this.config.backup.cron && !cron.validate(this.config.backup.cron)) console.error('Invalid Backup Cron Expression , Auto Bakcup Will Not Trigger');
+    this.config = config || {};
+    if (_.get(this.config,'build.cron') && !cron.validate(this.config.build.cron)) console.error('Invalid Build Cron Expression , Auto Build Will Not Trigger');
+    if (_.get(this.config,'backup.cron') && !cron.validate(this.config.backup.cron)) console.error('Invalid Backup Cron Expression , Auto Bakcup Will Not Trigger');
     if (!this.config.maxLinksPerSitemap || parseInt(this.config.maxLinksPerSitemap) < 1 || parseInt(this.config.maxLinksPerSitemap) > 50000) this.config.maxLinksPerSitemap = 50000;
     if (!this.config.path) this.config.path = './';
     if (this.config.path.charAt(this.config.path.length - 1) != '/') this.config.path = this.config.path + '/';
@@ -24,13 +24,13 @@ class sitemapBFramework {
     this.config.configDataJSON = this.config.configPath + 'data.json';
     await this.loadFile(this.config.configDataJSON, true, 'json', { data: {}, sitemapIndex: [] });
     this.changes = true;
-    if (this.config.build.cron) {
+    if (_.get(this.config,'build.cron')) {
       const task_build = cron.schedule(this.config.build.cron, () => {
         this.sitemapBuildAndDeploy()
       });
       task_build.start();
     }
-    if (this.config.backup.cron) {
+    if (_.get(this.config,'backup.cron')) {
       const task_backup = cron.schedule(this.config.backup.cron, () => {
         this.BackupToBucket()
       });
@@ -284,18 +284,18 @@ class sitemapBFramework {
   }
 
   async DeployToBucket() {
-    if (this.config.build && this.config.build.deployToBucket) {
+    if(_.get(this.config,'build.deployToBucket')) {
       let modeArr = Object.keys(this.config.build.deployToBucket);
       if (modeArr.length < 1) return true;
       const mode = modeArr[0];
       if (mode == 's3') {
-        if (!this.config.build.deployToBucket.s3.accessKeyId) { console.error('s3 is defined, config.build.deployToBucket.s3.accessKeyId Missing '); return false; }
-        if (!this.config.build.deployToBucket.s3.secretAccessKey) { console.error('s3 is defined, config.build.deployToBucket.s3.secretAccessKey Missing '); return false; }
-        if (!this.config.build.deployToBucket.s3.bucket) { console.error('s3 is defined, config.build.deployToBucket.s3.bucket Missing '); return false; }
+        if (!_.get(this.config,'build.deployToBucket.s3.accessKeyId')) { console.error('s3 is defined, config.build.deployToBucket.s3.accessKeyId Missing '); return false; }
+        if (!_.get(this.config,'build.deployToBucket.s3.secretAccessKey')) { console.error('s3 is defined, config.build.deployToBucket.s3.secretAccessKey Missing '); return false; }
+        if (!_.get(this.config,'build.deployToBucket.s3.bucket')) { console.error('s3 is defined, config.build.deployToBucket.s3.bucket Missing '); return false; }
       } else if (mode == 'gcs') {
-        if (!this.config.build.deployToBucket.gcs.projectId) { console.error('gcs is defined, config.build.deployToBucket.gcs.projectId Missing '); return false; }
-        if (!this.config.build.deployToBucket.gcs.service_account_key_path) { console.error('gcs is defined, config.build.deployToBucket.gcs.service_account_key_path Missing '); return false; }
-        if (!this.config.build.deployToBucket.gcs.bucket) { console.error('gcs is defined, config.build.deployToBucket.gcs.bucket Missing '); return false; }
+        if (!_.get(this.config,'build.deployToBucket.gcs.projectId')) { console.error('gcs is defined, config.build.deployToBucket.gcs.projectId Missing '); return false; }
+        if (!_.get(this.config,'build.deployToBucket.gcs.service_account_key_path')) { console.error('gcs is defined, config.build.deployToBucket.gcs.service_account_key_path Missing '); return false; }
+        if (!_.get(this.config,'build.deployToBucket.gcs.bucket')) { console.error('gcs is defined, config.build.deployToBucket.gcs.bucket Missing '); return false; }
       }
       if (mode == 's3') {
         const AWS = require('aws-sdk');
@@ -314,7 +314,7 @@ class sitemapBFramework {
             Key: this.config.build.deployToBucket.gcs.path + file,
             Body: fileContent
           };
-          if (this.config.build.deployToBucket.s3.makePublic) params.ACL = 'public-read';
+          if (_.get(this.config,'build.deployToBucket.s3.makePublic')) params.ACL = 'public-read';
           s3.upload(params, function (err, data) {
             if (err) console.error(err.message);
           });
@@ -334,7 +334,7 @@ class sitemapBFramework {
             destination: this.config.build.deployToBucket.gcs.path + file,
             gzip: true,
           });
-          if (this.config.build.deployToBucket.gcs.makePublic) {
+          if (_.get(this.config,'build.deployToBucket.gcs.makePublic')) {
             await storage.bucket(this.config.build.deployToBucket.gcs.bucket).file(this.config.build.deployToBucket.gcs.path + file).makePublic();
           }
         });
@@ -343,18 +343,18 @@ class sitemapBFramework {
   }
 
   async BackupToBucket() {
-    if (this.config.backup && this.config.backup.bakcupToBucket) {
+    if (_.get(this.config,'backup.bakcupToBucket')) {
       let modeArr = Object.keys(this.config.backup.bakcupToBucket);
       if (modeArr.length < 1) return true;
       const mode = modeArr[0];
       if (mode == 's3') {
-        if (!this.config.backup.bakcupToBucket.s3.accessKeyId) { console.error('s3 is defined, config.backup.bakcupToBucket.s3.accessKeyId Missing '); return false; }
-        if (!this.config.backup.bakcupToBucket.s3.secretAccessKey) { console.error('s3 is defined, config.backup.bakcupToBucket.s3.secretAccessKey Missing '); return false; }
-        if (!this.config.backup.bakcupToBucket.s3.bucket) { console.error('s3 is defined, config.backup.bakcupToBucket.s3.bucket Missing '); return false; }
+        if (!_.get(this.config,'backup.bakcupToBucket.s3.accessKeyId')) { console.error('s3 is defined, config.backup.bakcupToBucket.s3.accessKeyId Missing '); return false; }
+        if (!_.get(this.config,'backup.bakcupToBucket.s3.secretAccessKey')) { console.error('s3 is defined, config.backup.bakcupToBucket.s3.secretAccessKey Missing '); return false; }
+        if (!_.get(this.config,'backup.bakcupToBucket.s3.bucket')) { console.error('s3 is defined, config.backup.bakcupToBucket.s3.bucket Missing '); return false; }
       } else if (mode == 'gcs') {
-        if (!this.config.backup.bakcupToBucket.gcs.projectId) { console.error('gcs is defined, config.backup.bakcupToBucket.gcs.projectId Missing '); return false; }
-        if (!this.config.backup.bakcupToBucket.gcs.service_account_key_path) { console.error('gcs is defined, config.backup.bakcupToBucket.gcs.service_account_key_path Missing '); return false; }
-        if (!this.config.backup.bakcupToBucket.gcs.bucket) { console.error('gcs is defined, config.backup.bakcupToBucket.gcs.bucket Missing '); return false; }
+        if (!_.get(this.config,'backup.bakcupToBucket.gcs.projectId')) { console.error('gcs is defined, config.backup.bakcupToBucket.gcs.projectId Missing '); return false; }
+        if (!_.get(this.config,'backup.bakcupToBucket.gcs.service_account_key_path')) { console.error('gcs is defined, config.backup.bakcupToBucket.gcs.service_account_key_path Missing '); return false; }
+        if (!_.get(this.config,'backup.bakcupToBucket.gcs.bucket')) { console.error('gcs is defined, config.backup.bakcupToBucket.gcs.bucket Missing '); return false; }
       }
       const BackupNo = Date.now();
       if (mode == 's3') {

@@ -11,14 +11,16 @@ https://www.npmjs.com/package/sitemap-b-framework
 - Simple and Advanced Sitemap with Index supported
 - Auto Deploy Generated Sitemap to S3 or Google Cloud Storage Buckets
 - Persistent Local JSON File as Database
-- Auto Build and Deploy to Buckets or Local Storage from Manual Trigger or CRON
-- Backup Sitemap JSON DB and Sitemap XML to Buckets from Manual Trigger or CRON
+- Auto Build and Deploy to Buckets or Local Storage with Manual Trigger and CRON
+- Backup Sitemap JSON DB and Sitemap XML to Buckets with Manual Trigger and CRON
 - Webpages, Image, Video, News Sitemap Supported
-- Sitemap Links with Limit and Locking Constraint
+- Sitemap Links with Limit and Locking Constraints In Options
 
 ## Usage
 ### Simple Usage
+```js
 
+```
 ### Advanced Usage
 
 
