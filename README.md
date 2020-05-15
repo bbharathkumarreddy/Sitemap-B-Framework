@@ -60,7 +60,7 @@ var SitemapBFramework = new sitemapBFramework(options);
  limit = 0 to 50000
  locked = true or false
  */
- await SitemapBFramework.sitemapIndexAdd('sitemap-products.xml','webpages',50000,false);
+ await SitemapBFramework.sitemapIndexAdd('https://sitemap/sitemap-products.xml','webpages',50000,false);
 
 /*
  Add sitemap links to each sitemap file
@@ -70,7 +70,7 @@ var SitemapBFramework = new sitemapBFramework(options);
  changefreq = always, hourly, daily, weekly, monthly, yearly, never
  priority = 0.1 to 1.0 
  */
- await SitemapBFramework.sitemapItemAdd('https://example.com/product/laptop','sitemap-products.xml','2020-05-10','monthly',0.5);
+ await SitemapBFramework.sitemapItemAdd('https://example.com/product/laptop','https://sitemap/sitemap-products.xml','2020-05-10','monthly',0.5);
 
 
 /*
@@ -98,8 +98,8 @@ const options = {
     cron: "Cron Expression to auto build sitemap files and deploy to bucket if defined",  // optional
     deployToBucket: { // optional
       gcs: {
-        projectId: "GCP Project ID"
-        service_account_key_path: "Path to gcp service account json file"
+        projectId: "GCP Project ID",
+        service_account_key_path: "Path to gcp service account json file",
         bucket: "Name of Bucket",
         path: "Path Inside Bucket",
         makePublic: true | false,
@@ -117,8 +117,8 @@ const options = {
     cron: "Cron Expression to auto backup framework data and sitemap xml files to bucket if defined",  // optional
     bakcupToBucket: { // optional
       gcs: {
-        projectId: "GCP Project ID"
-        service_account_key_path: "Path to gcp service account json file"
+        projectId: "GCP Project ID",
+        service_account_key_path: "Path to gcp service account json file",
         bucket: "Name of Bucket",
         path: "Path Inside Bucket"
       },
@@ -136,15 +136,15 @@ const options = {
 ```js
 
  //sitemapIndexAdd(sitemap-name , type @optional, limit @optional, locked @optional);
- sitemapIndexAdd('sitemap-products.xml','webpages',50000,false);
+ sitemapIndexAdd('https://sitemap/sitemap-products.xml','webpages',50000,false);
 
  
  //sitemapIndexAdd(existing-sitemap-name ,new-sitemap-name , type @optional, limit @optional, locked @optional);
- sitemapIndexUpdate('sitemap-products.xml','sitemap-products-trending.xml','webpages',50000,false);
+ sitemapIndexUpdate('https://sitemap/sitemap-products.xml','https://sitemap/sitemap-products-trending.xml','webpages',50000,false);
 
 
  //sitemapIndexDelete(sitemap-name);
- sitemapIndexDelete('sitemap-products-trending.xml');
+ sitemapIndexDelete('https://sitemap/sitemap-products-trending.xml');
 
 
  //sitemapIndexList();
@@ -152,23 +152,23 @@ const options = {
 
 
  //sitemapItemAdd(loc , sitemapName @optional, lastmod @optional, changefreq @optional, priority @optional);
- sitemapItemAdd('https://example.com/product/laptop','sitemap-products.xml','2020-05-10','monthly',0.5);
+ sitemapItemAdd('https://example.com/product/laptop','https://sitemap/sitemap-products.xml','2020-05-10','monthly',0.5);
 
  
  //sitemapItemAdd(oldloc, loc , sitemapName @optional, lastmod @optional, changefreq @optional, priority @optional);
- sitemapItemUpdate('https://example.com/product/laptop','https://example.com/product/laptop-trending','sitemap-products.xml','2020-05-10','daily',0.9);
+ sitemapItemUpdate('https://example.com/product/laptop','https://example.com/product/laptop-trending','https://sitemap/sitemap-products.xml','2020-05-10','daily',0.9);
 
  
  //sitemapItemDelete(loc , sitemapName @optional);
- sitemapItemDelete('https://example.com/product/laptop-trending','sitemap-products.xml');
+ sitemapItemDelete('https://example.com/product/laptop-trending','https://sitemap/sitemap-products.xml');
 
 
  //sitemapItemList(sitemapName @optional)
- sitemapItemList('sitemap-products.xml');
+ sitemapItemList('https://sitemap/sitemap-products.xml');
  
 
  //sitemapGlobalSearch(loc)
- sitemapGlobalSearch('ttps://example.com/product/laptop-trending');
+ sitemapGlobalSearch('https://example.com/product/laptop-trending');
 
 
  //sitemapBuildAndDeploy()

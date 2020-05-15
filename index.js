@@ -357,6 +357,7 @@ class sitemapBFramework {
         if (!_.get(this.config,'backup.bakcupToBucket.gcs.bucket')) { console.error('gcs is defined, config.backup.bakcupToBucket.gcs.bucket Missing '); return false; }
       }
       const BackupNo = Date.now();
+      console.log('Sitemap Backup Started @ ' + BackupNo);
       if (mode == 's3') {
         const AWS = require('aws-sdk');
         const s3 = new AWS.S3({
