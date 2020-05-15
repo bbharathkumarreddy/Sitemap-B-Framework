@@ -24,7 +24,7 @@ https://www.npmjs.com/package/sitemap-b-framework
 var sitemapBFramework = require("sitemap-b-framework");
 var SitemapBFramework = new sitemapBFramework();
 
-// sitemapItemAdd(loc , sitemapName @optional, lastmod @optional, changefreq @optional, priority @optional);
+// sitemapItemAdd(itemLoc , sitemapName @optional, lastmod @optional, changefreq @optional, priority @optional);
 const data = await SitemapBFramework.sitemapItemAdd('https://example.com/product/laptop');
 const data = await SitemapBFramework.sitemapBuildAndDeploy();
 
@@ -52,28 +52,30 @@ const options = {
 }
 var SitemapBFramework = new sitemapBFramework(options);
 
-/*
+ /*
  Add sitemap index file for multiple sitemaps
- sitemapIndexAdd(sitemap-name , type @optional, limit @optional, locked @optional);
- sitemap-name = sitemapName
+ sitemapIndexAdd(sitemapName , loc, type @optional, limit @optional, locked @optional);
+ sitemapName = sitemapName
+ loc = location url
  type = webpages,news,image,video
  limit = 0 to 50000
  locked = true or false
  */
- await SitemapBFramework.sitemapIndexAdd('https://sitemap/sitemap-products.xml','webpages',50000,false);
+ await SitemapBFramework.sitemapIndexAdd('sitemap-products','https://sitemap/sitemap-products.xml','webpages',50000,false);
 
-/*
+ /*
  Add sitemap links to each sitemap file
- sitemapItemAdd(loc , sitemapName @optional, lastmod @optional, changefreq @optional, priority @optional);
- loc = URL
+ sitemapItemAdd(itemLoc , sitemapName @optional, lastmod @optional, changefreq @optional, priority @optional);
+ sitemapName = sitemapName
+ itemLoc = each item location
  lastmod = Last Modified Date YYYY-MM-DD
  changefreq = always, hourly, daily, weekly, monthly, yearly, never
  priority = 0.1 to 1.0 
  */
- await SitemapBFramework.sitemapItemAdd('https://example.com/product/laptop','https://sitemap/sitemap-products.xml','2020-05-10','monthly',0.5);
+ await SitemapBFramework.sitemapItemAdd('https://example.com/product/laptop','sitemap-products','2020-05-10','monthly',0.5);
 
 
-/*
+ /*
  Build Sitemap Index and  Sitemap Files and Deploy To Buckets - AWS S3 or GCP GCS
  sitemapBuildAndDeploy();
  - Sitemap generated at default folder  ./sitemap-xml/build , Can be overridden in option parameters
@@ -82,7 +84,7 @@ var SitemapBFramework = new sitemapBFramework(options);
  */
  await SitemapBFramework.sitemapBuildAndDeploy();
 
-/*
+ /*
  Notes:
  - Default path for framework data stored as json files at ./sitemap-config
  - Default path for lastest generated sitemap files are stored at ./sitemap-xml/build
@@ -135,36 +137,36 @@ const options = {
 ### Methods Available
 ```js
 
- //sitemapIndexAdd(sitemap-name , type @optional, limit @optional, locked @optional);
- sitemapIndexAdd('https://sitemap/sitemap-products.xml','webpages',50000,false);
+ //sitemapIndexAdd(sitemapName, loc, type @optional, limit @optional, locked @optional);
+ sitemapIndexAdd('sitemap-products', 'https://sitemap/sitemap-products.xml', 'webpages', 50000, false);
 
  
- //sitemapIndexAdd(existing-sitemap-name ,new-sitemap-name , type @optional, limit @optional, locked @optional);
- sitemapIndexUpdate('https://sitemap/sitemap-products.xml','https://sitemap/sitemap-products-trending.xml','webpages',50000,false);
+ //sitemapIndexAdd(sitemapName, loc, type @optional, limit @optional, locked @optional);
+ sitemapIndexAdd('sitemap-products', 'https://sitemap/sitemap-products-new.xml', 'webpages', 50000, false);
 
 
- //sitemapIndexDelete(sitemap-name);
- sitemapIndexDelete('https://sitemap/sitemap-products-trending.xml');
+ //sitemapIndexDelete(sitemapName);
+ sitemapIndexDelete('sitemap-products');
 
 
  //sitemapIndexList();
  sitemapIndexList();
 
 
- //sitemapItemAdd(loc , sitemapName @optional, lastmod @optional, changefreq @optional, priority @optional);
- sitemapItemAdd('https://example.com/product/laptop','https://sitemap/sitemap-products.xml','2020-05-10','monthly',0.5);
+ //sitemapItemAdd(itemLoc , sitemapName @optional, lastmod @optional, changefreq @optional, priority @optional);
+ sitemapItemAdd('https://example.com/product/laptop', 'sitemap-products', '2020-05-10', 'monthly', 0.5);
 
  
- //sitemapItemAdd(oldloc, loc , sitemapName @optional, lastmod @optional, changefreq @optional, priority @optional);
- sitemapItemUpdate('https://example.com/product/laptop','https://example.com/product/laptop-trending','https://sitemap/sitemap-products.xml','2020-05-10','daily',0.9);
+ //sitemapItemAdd(olditemLoc, itemLoc , sitemapName @optional, lastmod @optional, changefreq @optional, priority @optional);
+ sitemapItemUpdate('https://example.com/product/laptop', 'https://example.com/product/laptop-trending', 'sitemap-products', '2020-05-10', 'daily', 0.9);
 
  
- //sitemapItemDelete(loc , sitemapName @optional);
- sitemapItemDelete('https://example.com/product/laptop-trending','https://sitemap/sitemap-products.xml');
+ //sitemapItemDelete(itemLoc , sitemapName @optional);
+ sitemapItemDelete('https://example.com/product/laptop-trending', 'sitemap-products', );
 
 
  //sitemapItemList(sitemapName @optional)
- sitemapItemList('https://sitemap/sitemap-products.xml');
+ sitemapItemList('sitemap-products');
  
 
  //sitemapGlobalSearch(loc)

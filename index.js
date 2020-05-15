@@ -12,8 +12,8 @@ class sitemapBFramework {
 
   async init(config) {
     this.config = config || {};
-    if (_.get(this.config,'build.cron') && !cron.validate(this.config.build.cron)) console.error('Invalid Build Cron Expression , Auto Build Will Not Trigger');
-    if (_.get(this.config,'backup.cron') && !cron.validate(this.config.backup.cron)) console.error('Invalid Backup Cron Expression , Auto Bakcup Will Not Trigger');
+    if (_.get(this.config, 'build.cron') && !cron.validate(this.config.build.cron)) console.error('Invalid Build Cron Expression , Auto Build Will Not Trigger');
+    if (_.get(this.config, 'backup.cron') && !cron.validate(this.config.backup.cron)) console.error('Invalid Backup Cron Expression , Auto Bakcup Will Not Trigger');
     if (!this.config.maxLinksPerSitemap || parseInt(this.config.maxLinksPerSitemap) < 1 || parseInt(this.config.maxLinksPerSitemap) > 50000) this.config.maxLinksPerSitemap = 50000;
     if (!this.config.path) this.config.path = './';
     if (this.config.path.charAt(this.config.path.length - 1) != '/') this.config.path = this.config.path + '/';
@@ -24,13 +24,13 @@ class sitemapBFramework {
     this.config.configDataJSON = this.config.configPath + 'data.json';
     await this.loadFile(this.config.configDataJSON, true, 'json', { data: {}, sitemapIndex: [] });
     this.changes = true;
-    if (_.get(this.config,'build.cron')) {
+    if (_.get(this.config, 'build.cron')) {
       const task_build = cron.schedule(this.config.build.cron, () => {
         this.sitemapBuildAndDeploy()
       });
       task_build.start();
     }
-    if (_.get(this.config,'backup.cron')) {
+    if (_.get(this.config, 'backup.cron')) {
       const task_backup = cron.schedule(this.config.backup.cron, () => {
         this.BackupToBucket()
       });
@@ -39,13 +39,17 @@ class sitemapBFramework {
   }
 
 
-  async sitemapIndexAdd(sitemapName, type = 'webpages', limit = this.config.maxLinksPerSitemap, locked = false) {
+  async sitemapIndexAdd(sitemapName, loc, type = 'webpages', limit = this.config.maxLinksPerSitemap, locked = false) {
     let configDataJSON = await this.loadFile(this.config.configDataJSON, true, 'json', { data: {}, sitemapIndex: [] });
-    sitemapName = this.nameCheck(sitemapName);
-    const indexPosition = _.findIndex(configDataJSON.sitemapIndex, ['name', sitemapName.xml]);
+    sitemapName = this.sitemapNameCheck(sitemapName);
+    const indexPosition = _.findIndex(configDataJSON.sitemapIndex, ['name', sitemapName]);
     if (indexPosition >= 0) this.throwError(`Duplicate sitemapName Already Exists`);
+    loc = this.locCheck(loc);
+    const indexPositionLoc = _.findIndex(configDataJSON.sitemapIndex, ['loc', loc]);
+    if (indexPositionLoc >= 0) this.throwError(`Duplicate loc Already Exists`);
     const data = {
-      name: sitemapName.xml,
+      name: sitemapName,
+      loc,
       limit: this.limitCheck(limit),
       locked: this.lockedCheck(locked),
       type: this.typeCheck(type),
@@ -57,16 +61,15 @@ class sitemapBFramework {
     return { data, status: 200 };
   }
 
-  async sitemapIndexUpdate(oldSitemapName, sitemapName, type = 'webpages', limit = this.config.maxLinksPerSitemap, locked = false) {
+  async sitemapIndexUpdate(sitemapName, loc, type = 'webpages', limit = this.config.maxLinksPerSitemap, locked = false) {
     let configDataJSON = await this.loadFile(this.config.configDataJSON, true, 'json', { data: {}, sitemapIndex: [] });
-    sitemapName = this.nameCheck(sitemapName);
-    oldSitemapName = this.nameCheck(oldSitemapName);
-    const indexPositionExists = _.findIndex(configDataJSON.sitemapIndex, ['name', oldSitemapName.xml]);
-    if (indexPositionExists == -1) this.throwError(`oldSitemapName Does Not Exists`);
-    const indexPosition = _.findIndex(configDataJSON.sitemapIndex, ['name', sitemapName.xml]);
-    if (indexPosition >= 0 && indexPosition != indexPositionExists) this.throwError(`Duplicate sitemapName Already Exists`);
+    sitemapName = this.sitemapNameCheck(sitemapName);
+    const indexPosition = _.findIndex(configDataJSON.sitemapIndex, ['name', sitemapName]);
+    if (indexPosition < 0) this.throwError(`SitemapName Does Not Exists`);
+    loc = this.locCheck(loc);
     const data = {
-      name: sitemapName.xml,
+      name: sitemapName,
+      loc,
       limit: this.limitCheck(limit),
       locked: this.lockedCheck(locked),
       type: this.typeCheck(type),
@@ -80,8 +83,8 @@ class sitemapBFramework {
 
   async sitemapIndexDelete(sitemapName) {
     let configDataJSON = await this.loadFile(this.config.configDataJSON, true, 'json', { data: {}, sitemapIndex: [] });
-    sitemapName = this.nameCheck(sitemapName);
-    const indexPositionExists = _.findIndex(configDataJSON.sitemapIndex, ['name', sitemapName.xml]);
+    sitemapName = this.sitemapNameCheck(sitemapName);
+    const indexPositionExists = _.findIndex(configDataJSON.sitemapIndex, ['name', sitemapName]);
     if (indexPositionExists == -1) this.throwError(`sitemapName Does Not Exists`);
     if (configDataJSON.sitemapIndex[indexPositionExists].locked == true) this.throwError(`Cannot Delete sitemapName in locked state`);
     configDataJSON.sitemapIndex.splice(indexPositionExists, 1);
@@ -95,18 +98,18 @@ class sitemapBFramework {
     return { data: configDataJSON.sitemapIndex, status: 200 };
   }
 
-  async sitemapItemAdd(loc, sitemapName = null, lastmod = null, changefreq = null, priority = null) {
+  async sitemapItemAdd(itemLoc, sitemapName = null, lastmod = null, changefreq = null, priority = null) {
     let configDataJSON = await this.loadFile(this.config.configDataJSON, true, 'json', { data: {}, sitemapIndex: [] });
     let indexPositionExists;
     if (!sitemapName || sitemapName == 'index_default') {
-      sitemapName = this.nameCheck('index_default', 'name', true);
+      sitemapName = this.sitemapNameCheck('index_default', 'name', true);
     } else {
-      sitemapName = this.nameCheck(sitemapName);
-      indexPositionExists = _.findIndex(configDataJSON.sitemapIndex, ['name', sitemapName.xml]);
+      sitemapName = this.sitemapNameCheck(sitemapName);
+      indexPositionExists = _.findIndex(configDataJSON.sitemapIndex, ['name', sitemapName]);
       if (indexPositionExists == -1) this.throwError(`sitemapName Does Not Exists`);
     }
-    let sitemapDataJSON = await this.loadFile(this.config.configPath + sitemapName.json, true, 'json', []);
-    if (sitemapName.name == 'index_default' && sitemapDataJSON.length > this.config.maxLinksPerSitemap) {
+    let sitemapDataJSON = await this.loadFile(this.config.configPath + sitemapName + '.json', true, 'json', []);
+    if (sitemapName == 'index_default' && sitemapDataJSON.length > this.config.maxLinksPerSitemap) {
       this.throwError(`Default Sitemap Items Exceeding maxLinksPerSitemap of set limit : ${this.config.maxLinksPerSitemap}`);
     } else {
       const checkLimit = indexPositionExists ? configDataJSON.sitemapIndex[indexPositionExists].limit : this.config.maxLinksPerSitemap;
@@ -118,33 +121,33 @@ class sitemapBFramework {
       this.throwError(`${sitemapName} Sitemap is in locked state`);
     }
 
-    loc = this.locCheck(loc);
-    const sitemapPosition = _.findIndex(sitemapDataJSON, ['loc', loc]);
+    itemLoc = this.locCheck(itemLoc);
+    const sitemapPosition = _.findIndex(sitemapDataJSON, ['loc', itemLoc]);
     if (sitemapPosition > -1) this.throwError(`Duplicate sitemap Item loc is not allowed`);
 
     const data = {
-      loc,
+      loc: itemLoc,
       lastmod: this.lastmodCheck(lastmod),
       changefreq: this.changefreqCheck(changefreq),
       priority: this.priorityCheck(priority)
     };
     sitemapDataJSON.push(data);
-    await this.saveFile(this.config.configPath + sitemapName.json, sitemapDataJSON, 'json');
+    await this.saveFile(this.config.configPath + sitemapName + '.json', sitemapDataJSON, 'json');
     this.changes = true;
     return { data, status: 200 };
   }
 
-  async sitemapItemUpdate(oldLoc, loc, sitemapName = null, lastmod = null, changefreq = null, priority = null) {
+  async sitemapItemUpdate(oldItemLoc, itemLoc, sitemapName = null, lastmod = null, changefreq = null, priority = null) {
     let configDataJSON = await this.loadFile(this.config.configDataJSON, true, 'json', { data: {}, sitemapIndex: [] });
     let indexPositionExists;
     if (!sitemapName || sitemapName == 'index_default') {
-      sitemapName = this.nameCheck('index_default');
+      sitemapName = this.sitemapNameCheck('index_default');
     } else {
-      sitemapName = this.nameCheck(sitemapName);
-      indexPositionExists = _.findIndex(configDataJSON.sitemapIndex, ['name', sitemapName.xml]);
+      sitemapName = this.sitemapNameCheck(sitemapName);
+      indexPositionExists = _.findIndex(configDataJSON.sitemapIndex, ['name', sitemapName]);
       if (indexPositionExists == -1) this.throwError(`sitemapName Does Not Exists`);
     }
-    let sitemapDataJSON = await this.loadFile(this.config.configPath + sitemapName.json, true, 'json', []);
+    let sitemapDataJSON = await this.loadFile(this.config.configPath + sitemapName+'.json', true, 'json', []);
     if (sitemapName == 'index_default' && sitemapDataJSON.length > this.config.maxLinksPerSitemap) {
       this.throwError(`Default Sitemap Items Exceeding maxLinksPerSitemap of set limit : ${this.config.maxLinksPerSitemap}`);
     } else {
@@ -156,43 +159,43 @@ class sitemapBFramework {
     if (configDataJSON.sitemapIndex[indexPositionExists].locked) {
       this.throwError(`${sitemapName} Sitemap is in locked state`);
     }
-    oldLoc = this.locCheck(oldLoc);
-    const sitemapPositionExists = _.findIndex(sitemapDataJSON, ['loc', oldLoc]);
-    if (sitemapPositionExists < 0) this.throwError(`oldLoc Item loc not found in sitemap ${sitemapName.xml}`);
+    oldItemLoc = this.locCheck(oldItemLoc);
+    const sitemapPositionExists = _.findIndex(sitemapDataJSON, ['loc', oldItemLoc]);
+    if (sitemapPositionExists < 0) this.throwError(`oldLoc Item loc not found in sitemap ${sitemapName}`);
 
-    loc = this.locCheck(loc);
-    const sitemapPosition = _.findIndex(sitemapDataJSON, ['loc', loc]);
+    itemLoc = this.locCheck(itemLoc);
+    const sitemapPosition = _.findIndex(sitemapDataJSON, ['loc', itemLoc]);
     if (sitemapPosition > -1 && sitemapPositionExists != sitemapPosition) this.throwError(`Duplicate sitemap Item loc is not allowed`);
 
     const data = {
-      loc,
+      loc: itemLoc,
       lastmod: this.lastmodCheck(lastmod),
       changefreq: this.changefreqCheck(changefreq),
       priority: this.priorityCheck(priority)
     };
     sitemapDataJSON[sitemapPositionExists] = data;
-    await this.saveFile(this.config.configPath + sitemapName.json, sitemapDataJSON, 'json');
+    await this.saveFile(this.config.configPath + sitemapName+'.json', sitemapDataJSON, 'json');
     this.changes = true;
     return { data, status: 200 };
   }
 
-  async sitemapItemDelete(loc, sitemapName = null) {
+  async sitemapItemDelete(itemLoc, sitemapName = null) {
     let configDataJSON = await this.loadFile(this.config.configDataJSON, true, 'json', { data: {}, sitemapIndex: [] });
     let indexPositionExists;
     if (!sitemapName || sitemapName == 'index_default') {
-      sitemapName = this.nameCheck('index_default', null, true);
+      sitemapName = this.sitemapNameCheck('index_default', null, true);
     } else {
-      sitemapName = this.nameCheck(sitemapName);
-      indexPositionExists = _.findIndex(configDataJSON.sitemapIndex, ['name', sitemapName.xml]);
+      sitemapName = this.sitemapNameCheck(sitemapName);
+      indexPositionExists = _.findIndex(configDataJSON.sitemapIndex, ['name', sitemapName]);
       if (indexPositionExists == -1) this.throwError(`sitemapName Does Not Exists`);
     }
     if (configDataJSON.sitemapIndex[indexPositionExists].locked) this.throwError(`${sitemapName} Sitemap is in locked state`);
-    let sitemapDataJSON = await this.loadFile(this.config.configPath + sitemapName.json, true, 'json', []);
-    loc = this.locCheck(loc);
-    const sitemapPositionExists = _.findIndex(sitemapDataJSON, ['loc', loc]);
-    if (sitemapPositionExists < 0) this.throwError(`loc Item not found in sitemap ${sitemapName.xml}`);
+    let sitemapDataJSON = await this.loadFile(this.config.configPath + sitemapName, true, 'json', []);
+    itemLoc = this.locCheck(itemLoc);
+    const sitemapPositionExists = _.findIndex(sitemapDataJSON, ['loc', itemLoc]);
+    if (sitemapPositionExists < 0) this.throwError(`loc Item not found in sitemap ${sitemapName}`);
     sitemapDataJSON.splice(sitemapPositionExists, 1);
-    await this.saveFile(this.config.configPath + sitemapName.json, sitemapDataJSON, 'json');
+    await this.saveFile(this.config.configPath + sitemapName+'.json', sitemapDataJSON, 'json');
     this.changes = true;
     return { data: 'Deleted Successfully', status: 200 };
   }
@@ -200,13 +203,13 @@ class sitemapBFramework {
   async sitemapItemList(sitemapName = null) {
     let configDataJSON = await this.loadFile(this.config.configDataJSON, true, 'json', { data: {}, sitemapIndex: [] });
     if (!sitemapName || sitemapName == 'index_default') {
-      sitemapName = this.nameCheck('index_default', null, true);
+      sitemapName = this.sitemapNameCheck('index_default', null, true);
     } else {
-      sitemapName = this.nameCheck(sitemapName);
-      const indexPositionExists = _.findIndex(configDataJSON.sitemapIndex, ['name', sitemapName.xml]);
+      sitemapName = this.sitemapNameCheck(sitemapName);
+      const indexPositionExists = _.findIndex(configDataJSON.sitemapIndex, ['name', sitemapName]);
       if (indexPositionExists == -1) this.throwError(`sitemapName Does Not Exists`);
     }
-    const sitemapDataJSON = await this.loadFile(this.config.configPath + sitemapName.json, true, 'json', []);
+    const sitemapDataJSON = await this.loadFile(this.config.configPath + sitemapName+'.json', true, 'json', []);
     return { data: sitemapDataJSON, status: 200 };
   }
 
@@ -217,13 +220,13 @@ class sitemapBFramework {
     sitemapIndexList.push('index_default');
     loc = this.locCheck(loc);
     for (let i = 0; i < sitemapIndexList.length; i++) {
-      const sitemapName = this.nameCheck(sitemapIndexList[i]);
-      const sitemapDataJSON = await this.loadFile(this.config.configPath + sitemapName.json, false, 'json');
+      const sitemapName = this.sitemapNameCheck(sitemapIndexList[i]);
+      const sitemapDataJSON = await this.loadFile(this.config.configPath + sitemapName+'.json', false, 'json');
       const sitemapPositionExists = _.findIndex(sitemapDataJSON, ['loc', loc]);
       if (sitemapPositionExists < 0) continue;
-      return { data: { sitemapName: sitemapName.xml, sitemap: { position: sitemapPositionExists, ...sitemapDataJSON[sitemapPositionExists] } }, status: 200 };
+      return { data: { sitemapName: sitemapName, sitemap: { position: sitemapPositionExists, ...sitemapDataJSON[sitemapPositionExists] } }, status: 200 };
     }
-    return 'Loc Not Found';
+    return 'itemLoc Not Found';
   }
 
   async sitemapBuildAndDeploy() {
@@ -232,13 +235,13 @@ class sitemapBFramework {
     fs.mkdirSync(`${this.config.sitemapPath}build-${buildNo}`, { recursive: true });
     console.log('Sitemap Build Started @ ' + buildNo);
     if (configDataJSON.sitemapIndex.length <= 0) {
-      const sitemapName = this.nameCheck('index_default', 'name', 'true');
-      await this.sitemapEachBuild(sitemapName.json, 'sitemap.xml', buildNo, 'webpages');
+      const sitemapName = this.sitemapNameCheck('index_default', 'name', 'true');
+      await this.sitemapEachBuild(sitemapName+'.json', 'sitemap.xml', buildNo, 'webpages');
     } else {
       await this.sitemapIndexBuild(configDataJSON, buildNo);
       for (let i = 0; i < configDataJSON.sitemapIndex.length; i++) {
-        const name = this.nameCheck(configDataJSON.sitemapIndex[i].name);
-        await this.sitemapEachBuild(name.json, name.xml, buildNo, configDataJSON.sitemapIndex[i].type || 'webpages');
+        const name = this.sitemapNameCheck(configDataJSON.sitemapIndex[i].name);
+        await this.sitemapEachBuild(name+'.json', name+'.xml', buildNo, configDataJSON.sitemapIndex[i].type || 'webpages');
       }
     }
     this.changes = false;
@@ -253,7 +256,7 @@ class sitemapBFramework {
     const sitemapIndexXML = create({ version: '1.0', encoding: "UTF-8" });
     const sitemapIndexXMLUP = sitemapIndexXML.ele('sitemapindex', { xmlns: 'http://www.sitemaps.org/schemas/sitemap/0.9' });
     configDataJSON.sitemapIndex.forEach(element => {
-      sitemapIndexXMLUP.ele('sitemap').ele('loc').txt(element.name).up();
+      sitemapIndexXMLUP.ele('sitemap').ele('loc').txt(element.loc).up();
     });
     const xml = sitemapIndexXML.end({ prettyPrint: true });
     fs.writeFileSync(`${this.config.sitemapPath}build/sitemap.xml`, xml);
@@ -284,18 +287,18 @@ class sitemapBFramework {
   }
 
   async DeployToBucket() {
-    if(_.get(this.config,'build.deployToBucket')) {
+    if (_.get(this.config, 'build.deployToBucket')) {
       let modeArr = Object.keys(this.config.build.deployToBucket);
       if (modeArr.length < 1) return true;
       const mode = modeArr[0];
       if (mode == 's3') {
-        if (!_.get(this.config,'build.deployToBucket.s3.accessKeyId')) { console.error('s3 is defined, config.build.deployToBucket.s3.accessKeyId Missing '); return false; }
-        if (!_.get(this.config,'build.deployToBucket.s3.secretAccessKey')) { console.error('s3 is defined, config.build.deployToBucket.s3.secretAccessKey Missing '); return false; }
-        if (!_.get(this.config,'build.deployToBucket.s3.bucket')) { console.error('s3 is defined, config.build.deployToBucket.s3.bucket Missing '); return false; }
+        if (!_.get(this.config, 'build.deployToBucket.s3.accessKeyId')) { console.error('s3 is defined, config.build.deployToBucket.s3.accessKeyId Missing '); return false; }
+        if (!_.get(this.config, 'build.deployToBucket.s3.secretAccessKey')) { console.error('s3 is defined, config.build.deployToBucket.s3.secretAccessKey Missing '); return false; }
+        if (!_.get(this.config, 'build.deployToBucket.s3.bucket')) { console.error('s3 is defined, config.build.deployToBucket.s3.bucket Missing '); return false; }
       } else if (mode == 'gcs') {
-        if (!_.get(this.config,'build.deployToBucket.gcs.projectId')) { console.error('gcs is defined, config.build.deployToBucket.gcs.projectId Missing '); return false; }
-        if (!_.get(this.config,'build.deployToBucket.gcs.service_account_key_path')) { console.error('gcs is defined, config.build.deployToBucket.gcs.service_account_key_path Missing '); return false; }
-        if (!_.get(this.config,'build.deployToBucket.gcs.bucket')) { console.error('gcs is defined, config.build.deployToBucket.gcs.bucket Missing '); return false; }
+        if (!_.get(this.config, 'build.deployToBucket.gcs.projectId')) { console.error('gcs is defined, config.build.deployToBucket.gcs.projectId Missing '); return false; }
+        if (!_.get(this.config, 'build.deployToBucket.gcs.service_account_key_path')) { console.error('gcs is defined, config.build.deployToBucket.gcs.service_account_key_path Missing '); return false; }
+        if (!_.get(this.config, 'build.deployToBucket.gcs.bucket')) { console.error('gcs is defined, config.build.deployToBucket.gcs.bucket Missing '); return false; }
       }
       if (mode == 's3') {
         const AWS = require('aws-sdk');
@@ -314,7 +317,7 @@ class sitemapBFramework {
             Key: this.config.build.deployToBucket.gcs.path + file,
             Body: fileContent
           };
-          if (_.get(this.config,'build.deployToBucket.s3.makePublic')) params.ACL = 'public-read';
+          if (_.get(this.config, 'build.deployToBucket.s3.makePublic')) params.ACL = 'public-read';
           s3.upload(params, function (err, data) {
             if (err) console.error(err.message);
           });
@@ -334,7 +337,7 @@ class sitemapBFramework {
             destination: this.config.build.deployToBucket.gcs.path + file,
             gzip: true,
           });
-          if (_.get(this.config,'build.deployToBucket.gcs.makePublic')) {
+          if (_.get(this.config, 'build.deployToBucket.gcs.makePublic')) {
             await storage.bucket(this.config.build.deployToBucket.gcs.bucket).file(this.config.build.deployToBucket.gcs.path + file).makePublic();
           }
         });
@@ -343,18 +346,18 @@ class sitemapBFramework {
   }
 
   async BackupToBucket() {
-    if (_.get(this.config,'backup.bakcupToBucket')) {
+    if (_.get(this.config, 'backup.bakcupToBucket')) {
       let modeArr = Object.keys(this.config.backup.bakcupToBucket);
       if (modeArr.length < 1) return true;
       const mode = modeArr[0];
       if (mode == 's3') {
-        if (!_.get(this.config,'backup.bakcupToBucket.s3.accessKeyId')) { console.error('s3 is defined, config.backup.bakcupToBucket.s3.accessKeyId Missing '); return false; }
-        if (!_.get(this.config,'backup.bakcupToBucket.s3.secretAccessKey')) { console.error('s3 is defined, config.backup.bakcupToBucket.s3.secretAccessKey Missing '); return false; }
-        if (!_.get(this.config,'backup.bakcupToBucket.s3.bucket')) { console.error('s3 is defined, config.backup.bakcupToBucket.s3.bucket Missing '); return false; }
+        if (!_.get(this.config, 'backup.bakcupToBucket.s3.accessKeyId')) { console.error('s3 is defined, config.backup.bakcupToBucket.s3.accessKeyId Missing '); return false; }
+        if (!_.get(this.config, 'backup.bakcupToBucket.s3.secretAccessKey')) { console.error('s3 is defined, config.backup.bakcupToBucket.s3.secretAccessKey Missing '); return false; }
+        if (!_.get(this.config, 'backup.bakcupToBucket.s3.bucket')) { console.error('s3 is defined, config.backup.bakcupToBucket.s3.bucket Missing '); return false; }
       } else if (mode == 'gcs') {
-        if (!_.get(this.config,'backup.bakcupToBucket.gcs.projectId')) { console.error('gcs is defined, config.backup.bakcupToBucket.gcs.projectId Missing '); return false; }
-        if (!_.get(this.config,'backup.bakcupToBucket.gcs.service_account_key_path')) { console.error('gcs is defined, config.backup.bakcupToBucket.gcs.service_account_key_path Missing '); return false; }
-        if (!_.get(this.config,'backup.bakcupToBucket.gcs.bucket')) { console.error('gcs is defined, config.backup.bakcupToBucket.gcs.bucket Missing '); return false; }
+        if (!_.get(this.config, 'backup.bakcupToBucket.gcs.projectId')) { console.error('gcs is defined, config.backup.bakcupToBucket.gcs.projectId Missing '); return false; }
+        if (!_.get(this.config, 'backup.bakcupToBucket.gcs.service_account_key_path')) { console.error('gcs is defined, config.backup.bakcupToBucket.gcs.service_account_key_path Missing '); return false; }
+        if (!_.get(this.config, 'backup.bakcupToBucket.gcs.bucket')) { console.error('gcs is defined, config.backup.bakcupToBucket.gcs.bucket Missing '); return false; }
       }
       const BackupNo = Date.now();
       console.log('Sitemap Backup Started @ ' + BackupNo);
@@ -417,16 +420,12 @@ class sitemapBFramework {
   }
 
 
-  nameCheck(name, identifier = 'Name', force = false) {
-    if (!name || typeof (name) != 'string') this.throwError(`${identifier} is mandatory, Should be string`);
-    name = name.toLowerCase();
-    if (name.substring(name.length - 4) == '.xml') name = name.substring(0, name.length - 4);
-    if (['sitemap-01', 'sitemap', 'index_default'].includes(name) && !force) this.throwError(`sitemapNames with ['sitemap', 'sitemap-01', 'index_default'] are reserved and not allowed`);
-    return {
-      name,
-      xml: `${name}.xml`,
-      json: `${name}.json`
-    }
+  sitemapNameCheck(sitemapName, identifier = 'Name', force = false) {
+    if (!sitemapName || typeof (sitemapName) != 'string') this.throwError(`${identifier} is mandatory, Should be string`);
+    sitemapName = sitemapName.toLowerCase();
+    if (!(/^[a-zA-Z0-9- _]*$/.test(sitemapName))) this.throwError(`sitemapNames special characters not allowed`);
+    if (['sitemap-01', 'sitemap', 'index_default'].includes(sitemapName) && !force) this.throwError(`sitemapNames with ['sitemap', 'sitemap-01', 'index_default'] are reserved and not allowed`);
+    return sitemapName
   }
 
   limitCheck(limit = 50000) {
