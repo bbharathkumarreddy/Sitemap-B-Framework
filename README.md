@@ -3,6 +3,8 @@ Advanced Sitemap Management, Building, Deployment Framework [Open Source]
 
 More info on sitemaps [here](https://support.google.com/webmasters/answer/156184?hl=en&ref_topic=4581190&visit_id=637249895675378920-943348363&rd=1)
 
+Beta Version - [GA by june,2020]
+
 ## Installation
 ```sh
 npm i sitemap-b-framework --save
@@ -191,4 +193,4 @@ Contributors are welcome
 
 See [LICENSE](https://github.com/bbharathkumarreddy/Sitemap-B-Framework/blob/master/LICENSE) file.
 
-Development In Progress [GA by june,2020]
+Beta Version [GA by june,2020]
