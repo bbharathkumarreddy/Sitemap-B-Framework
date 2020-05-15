@@ -3,7 +3,7 @@ Advanced Sitemap Management, Building, Deployment Framework [Open Source]
 
 More info on sitemaps [here](https://support.google.com/webmasters/answer/156184?hl=en&ref_topic=4581190&visit_id=637249895675378920-943348363&rd=1)
 
-Beta Version - [GA by june,2020]
+Note: Current Release Beta Version - [GA By June,2020]
 
 ## Installation
 ```sh
@@ -26,7 +26,7 @@ https://www.npmjs.com/package/sitemap-b-framework
 var sitemapBFramework = require("sitemap-b-framework");
 var SitemapBFramework = new sitemapBFramework();
 
-// sitemapItemAdd(itemLoc , sitemapName @optional, lastmod @optional, changefreq @optional, priority @optional);
+// sitemapItemAdd(itemLoc, sitemapName @optional, lastmod @optional, changefreq @optional, priority @optional);
 const data = await SitemapBFramework.sitemapItemAdd('https://example.com/product/laptop');
 const data = await SitemapBFramework.sitemapBuildAndDeploy();
 
@@ -56,7 +56,7 @@ var SitemapBFramework = new sitemapBFramework(options);
 
  /*
  Add sitemap index file for multiple sitemaps
- sitemapIndexAdd(sitemapName , loc, type @optional, limit @optional, locked @optional);
+ sitemapIndexAdd(sitemapName, loc, type @optional, limit @optional, locked @optional);
  sitemapName = sitemapName
  loc = location url
  type = webpages,news,image,video
@@ -67,7 +67,7 @@ var SitemapBFramework = new sitemapBFramework(options);
 
  /*
  Add sitemap links to each sitemap file
- sitemapItemAdd(itemLoc , sitemapName @optional, lastmod @optional, changefreq @optional, priority @optional);
+ sitemapItemAdd(itemLoc, sitemapName @optional, lastmod @optional, changefreq @optional, priority @optional);
  sitemapName = sitemapName
  itemLoc = each item location
  lastmod = Last Modified Date YYYY-MM-DD
@@ -155,7 +155,7 @@ const options = {
  sitemapIndexList();
 
 
- //sitemapItemAdd(itemLoc , sitemapName @optional, lastmod @optional, changefreq @optional, priority @optional);
+ //sitemapItemAdd(itemLoc, sitemapName @optional, lastmod @optional, changefreq @optional, priority @optional);
  sitemapItemAdd('https://example.com/product/laptop', 'sitemap-products', '2020-05-10', 'monthly', 0.5);
 
  
@@ -163,7 +163,7 @@ const options = {
  sitemapItemUpdate('https://example.com/product/laptop', 'https://example.com/product/laptop-trending', 'sitemap-products', '2020-05-10', 'daily', 0.9);
 
  
- //sitemapItemDelete(itemLoc , sitemapName @optional);
+ //sitemapItemDelete(itemLoc, sitemapName @optional);
  sitemapItemDelete('https://example.com/product/laptop-trending', 'sitemap-products', );
 
 
@@ -193,4 +193,4 @@ Contributors are welcome
 
 See [LICENSE](https://github.com/bbharathkumarreddy/Sitemap-B-Framework/blob/master/LICENSE) file.
 
-Beta Version [GA by june,2020]
+Note: Current Release Beta Version - [GA By June,2020]
