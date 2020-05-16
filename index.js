@@ -75,7 +75,7 @@ class sitemapBFramework {
       type: this.typeCheck(type),
       lastUpdated: new Date()
     };
-    configDataJSON.sitemapIndex[indexPositionExists] = data;
+    configDataJSON.sitemapIndex[indexPosition] = data;
     await this.saveFile(this.config.configDataJSON, configDataJSON, 'json');
     this.changes = true;
     return { data, status: 200 };
@@ -141,7 +141,7 @@ class sitemapBFramework {
     let configDataJSON = await this.loadFile(this.config.configDataJSON, true, 'json', { data: {}, sitemapIndex: [] });
     let indexPositionExists;
     if (!sitemapName || sitemapName == 'index_default') {
-      sitemapName = this.sitemapNameCheck('index_default');
+      sitemapName = this.sitemapNameCheck('index_default', 'name', true);
     } else {
       sitemapName = this.sitemapNameCheck(sitemapName);
       indexPositionExists = _.findIndex(configDataJSON.sitemapIndex, ['name', sitemapName]);
@@ -151,12 +151,12 @@ class sitemapBFramework {
     if (sitemapName == 'index_default' && sitemapDataJSON.length > this.config.maxLinksPerSitemap) {
       this.throwError(`Default Sitemap Items Exceeding maxLinksPerSitemap of set limit : ${this.config.maxLinksPerSitemap}`);
     } else {
-      const checkLimit = configDataJSON.sitemapIndex[indexPositionExists].limit || this.config.maxLinksPerSitemap;
+      const checkLimit = indexPositionExists ? configDataJSON.sitemapIndex[indexPositionExists].limit : this.config.maxLinksPerSitemap;
       if (sitemapDataJSON.length > checkLimit) {
         this.throwError(`${sitemapName} Sitemap Items Exceeding maxLinksPerSitemap of set limit : ${checkLimit}`);
       }
     }
-    if (configDataJSON.sitemapIndex[indexPositionExists].locked) {
+    if (indexPositionExists && configDataJSON.sitemapIndex[indexPositionExists].locked) {
       this.throwError(`${sitemapName} Sitemap is in locked state`);
     }
     oldItemLoc = this.locCheck(oldItemLoc);
@@ -189,8 +189,8 @@ class sitemapBFramework {
       indexPositionExists = _.findIndex(configDataJSON.sitemapIndex, ['name', sitemapName]);
       if (indexPositionExists == -1) this.throwError(`sitemapName Does Not Exists`);
     }
-    if (configDataJSON.sitemapIndex[indexPositionExists].locked) this.throwError(`${sitemapName} Sitemap is in locked state`);
-    let sitemapDataJSON = await this.loadFile(this.config.configPath + sitemapName, true, 'json', []);
+    if (indexPositionExists && configDataJSON.sitemapIndex[indexPositionExists].locked) this.throwError(`${sitemapName} Sitemap is in locked state`);
+    let sitemapDataJSON = await this.loadFile(this.config.configPath + sitemapName + '.json', true, 'json', []);
     itemLoc = this.locCheck(itemLoc);
     const sitemapPositionExists = _.findIndex(sitemapDataJSON, ['loc', itemLoc]);
     if (sitemapPositionExists < 0) this.throwError(`loc Item not found in sitemap ${sitemapName}`);
@@ -220,7 +220,7 @@ class sitemapBFramework {
     sitemapIndexList.push('index_default');
     loc = this.locCheck(loc);
     for (let i = 0; i < sitemapIndexList.length; i++) {
-      const sitemapName = this.sitemapNameCheck(sitemapIndexList[i]);
+      const sitemapName = sitemapIndexList[i] == 'index_default' ? this.sitemapNameCheck(sitemapIndexList[i], 'name', true) : this.sitemapNameCheck(sitemapIndexList[i]);
       const sitemapDataJSON = await this.loadFile(this.config.configPath + sitemapName + '.json', false, 'json');
       const sitemapPositionExists = _.findIndex(sitemapDataJSON, ['loc', loc]);
       if (sitemapPositionExists < 0) continue;
@@ -420,7 +420,6 @@ class sitemapBFramework {
       }
     }
   }
-
 
   sitemapNameCheck(sitemapName, identifier = 'Name', force = false) {
     if (!sitemapName || typeof (sitemapName) != 'string') this.throwError(`${identifier} is mandatory, Should be string`);
