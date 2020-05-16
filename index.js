@@ -147,7 +147,7 @@ class sitemapBFramework {
       indexPositionExists = _.findIndex(configDataJSON.sitemapIndex, ['name', sitemapName]);
       if (indexPositionExists == -1) this.throwError(`sitemapName Does Not Exists`);
     }
-    let sitemapDataJSON = await this.loadFile(this.config.configPath + sitemapName+'.json', true, 'json', []);
+    let sitemapDataJSON = await this.loadFile(this.config.configPath + sitemapName + '.json', true, 'json', []);
     if (sitemapName == 'index_default' && sitemapDataJSON.length > this.config.maxLinksPerSitemap) {
       this.throwError(`Default Sitemap Items Exceeding maxLinksPerSitemap of set limit : ${this.config.maxLinksPerSitemap}`);
     } else {
@@ -174,7 +174,7 @@ class sitemapBFramework {
       priority: this.priorityCheck(priority)
     };
     sitemapDataJSON[sitemapPositionExists] = data;
-    await this.saveFile(this.config.configPath + sitemapName+'.json', sitemapDataJSON, 'json');
+    await this.saveFile(this.config.configPath + sitemapName + '.json', sitemapDataJSON, 'json');
     this.changes = true;
     return { data, status: 200 };
   }
@@ -195,7 +195,7 @@ class sitemapBFramework {
     const sitemapPositionExists = _.findIndex(sitemapDataJSON, ['loc', itemLoc]);
     if (sitemapPositionExists < 0) this.throwError(`loc Item not found in sitemap ${sitemapName}`);
     sitemapDataJSON.splice(sitemapPositionExists, 1);
-    await this.saveFile(this.config.configPath + sitemapName+'.json', sitemapDataJSON, 'json');
+    await this.saveFile(this.config.configPath + sitemapName + '.json', sitemapDataJSON, 'json');
     this.changes = true;
     return { data: 'Deleted Successfully', status: 200 };
   }
@@ -209,7 +209,7 @@ class sitemapBFramework {
       const indexPositionExists = _.findIndex(configDataJSON.sitemapIndex, ['name', sitemapName]);
       if (indexPositionExists == -1) this.throwError(`sitemapName Does Not Exists`);
     }
-    const sitemapDataJSON = await this.loadFile(this.config.configPath + sitemapName+'.json', true, 'json', []);
+    const sitemapDataJSON = await this.loadFile(this.config.configPath + sitemapName + '.json', true, 'json', []);
     return { data: sitemapDataJSON, status: 200 };
   }
 
@@ -221,7 +221,7 @@ class sitemapBFramework {
     loc = this.locCheck(loc);
     for (let i = 0; i < sitemapIndexList.length; i++) {
       const sitemapName = this.sitemapNameCheck(sitemapIndexList[i]);
-      const sitemapDataJSON = await this.loadFile(this.config.configPath + sitemapName+'.json', false, 'json');
+      const sitemapDataJSON = await this.loadFile(this.config.configPath + sitemapName + '.json', false, 'json');
       const sitemapPositionExists = _.findIndex(sitemapDataJSON, ['loc', loc]);
       if (sitemapPositionExists < 0) continue;
       return { data: { sitemapName: sitemapName, sitemap: { position: sitemapPositionExists, ...sitemapDataJSON[sitemapPositionExists] } }, status: 200 };
@@ -236,12 +236,14 @@ class sitemapBFramework {
     console.log('Sitemap Build Started @ ' + buildNo);
     if (configDataJSON.sitemapIndex.length <= 0) {
       const sitemapName = this.sitemapNameCheck('index_default', 'name', 'true');
-      await this.sitemapEachBuild(sitemapName+'.json', 'sitemap.xml', buildNo, 'webpages');
+      await this.sitemapEachBuild(sitemapName + '.json', 'sitemap.xml', buildNo, 'webpages');
     } else {
       await this.sitemapIndexBuild(configDataJSON, buildNo);
+      const sitemapName = this.sitemapNameCheck('index_default', 'name', 'true');
+      await this.sitemapEachBuild(sitemapName + '.json', 'sitemap-01.xml', buildNo, 'webpages');
       for (let i = 0; i < configDataJSON.sitemapIndex.length; i++) {
         const name = this.sitemapNameCheck(configDataJSON.sitemapIndex[i].name);
-        await this.sitemapEachBuild(name+'.json', name+'.xml', buildNo, configDataJSON.sitemapIndex[i].type || 'webpages');
+        await this.sitemapEachBuild(name + '.json', name + '.xml', buildNo, configDataJSON.sitemapIndex[i].type || 'webpages');
       }
     }
     this.changes = false;
@@ -477,22 +479,30 @@ class sitemapBFramework {
 
 
   async loadFile(file, createIfNotExists = true, format = 'json', data = null) {
-    if (!fs.existsSync(file) && createIfNotExists) {
-      if (format == 'json' && !data) data = '{}';
-      else if (format == 'json' && data) data = JSON.stringify(data);
-      else if (!data) data = '';
-      fs.writeFileSync(file, data);
-    } else if (!fs.existsSync(file)) {
-      return false;
+    try {
+      if (!fs.existsSync(file) && createIfNotExists) {
+        if (format == 'json' && !data) data = '{}';
+        else if (format == 'json' && data) data = JSON.stringify(data);
+        else if (!data) data = '';
+        fs.writeFileSync(file, data);
+      } else if (!fs.existsSync(file)) {
+        return false;
+      }
+      const finalData = fs.readFileSync(file, 'utf8');
+      if (format == 'json') return JSON.parse(finalData);
+      return finalData;
+    } catch (e) {
+      console.errro(e.message)
     }
-    const finalData = fs.readFileSync(file, 'utf8');
-    if (format == 'json') return JSON.parse(finalData);
-    return finalData;
   }
 
   async saveFile(file, data, format = 'json') {
-    if (format == 'json') return fs.writeFileSync(file, JSON.stringify(data))
-    return fs.writeFileSync(file, data)
+    try {
+      if (format == 'json') return fs.writeFileSync(file, JSON.stringify(data))
+      return fs.writeFileSync(file, data)
+    } catch (e) {
+      console.errro(e.message)
+    }
   }
 
   throwError(errorString, status = 400) {
