@@ -143,8 +143,8 @@ const options = {
  sitemapIndexAdd('sitemap-products', 'https://sitemap/sitemap-products.xml', 'webpages', 50000, false);
 
  
- //sitemapIndexAdd(sitemapName, loc, type @optional, limit @optional, locked @optional);
- sitemapIndexAdd('sitemap-products', 'https://sitemap/sitemap-products-new.xml', 'webpages', 50000, false);
+ //sitemapIndexUpdate(sitemapName, loc, type @optional, limit @optional, locked @optional);
+ sitemapIndexUpdate('sitemap-products', 'https://sitemap/sitemap-products-new.xml', 'webpages', 50000, false);
 
 
  //sitemapIndexDelete(sitemapName);
