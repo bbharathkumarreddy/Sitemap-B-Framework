@@ -429,10 +429,11 @@ class sitemapBFramework {
     return sitemapName
   }
 
-  limitCheck(limit = 50000) {
+  limitCheck(limit = this.config.maxLinksPerSitemap) {
     limit = parseInt(limit);
-    if (limit && (limit < 0 || limit > 50000)) this.throwError(`Max limit cannot exceed 50000`);
-    return limit;
+    if(isNaN(limit)) limit = this.config.maxLinksPerSitemap;
+    if (limit && (limit < 0 || limit > this.config.maxLinksPerSitemap)) this.throwError(`Max limit cannot exceed set limit of ${this.config.maxLinksPerSitemap}`);
+    return limit || this.config.maxLinksPerSitemap;
   }
 
   lockedCheck(locked = 'false') {
