@@ -272,7 +272,7 @@ class sitemapBFramework {
     const rootAttr = { xmlns: 'http://www.sitemaps.org/schemas/sitemap/0.9' }
     if (type == 'video') rootAttr['xmlns:video'] = 'http://www.google.com/schemas/sitemap-video/1.1';
     else if (type == 'image') rootAttr['xmlns:image'] = 'http://www.google.com/schemas/sitemap-image/1.1';
-    else if (type == 'news') rootAttr['xmlns:news'] = '"http://www.google.com/schemas/sitemap-news/0.9';
+    else if (type == 'news') rootAttr['xmlns:news'] = 'http://www.google.com/schemas/sitemap-news/0.9';
     const sitemapXMLUP = sitemapXML.ele('urlset', rootAttr);
     if (sitemapDataJSON) {
       sitemapDataJSON.forEach(element => {
