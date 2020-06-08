@@ -1,13 +1,15 @@
 {
   "name": "sitemap-b-framework",
-  "version": "1.1.7",
-  "description": "Advanced Sitemap Management, Building, Deployment Framework",
+  "version": "1.1.8",
+  "description": "Advanced Sitemap Management, Generating & Deployment Framework",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
     "sitemap",
+    "sitemap-generator",
+    "sitemap-builder",
     "sitemap-index",
     "image-sitemap",
     "video-sitemap",
