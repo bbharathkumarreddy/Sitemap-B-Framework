@@ -235,7 +235,7 @@ class sitemapBFramework {
   async sitemapBuildAndDeploy() {
     const configDataJSON = await this.loadFile(this.config.configDataJSON, true, 'json', { data: {}, sitemapIndex: [] });
     const buildNo = Date.now();
-    await del([this.config.sitemapPath + 'build']);
+    await del([this.config.sitemapPath + 'build'], { force: true });
     fs.mkdirSync(this.config.sitemapPath + 'build', { recursive: true });
     fs.mkdirSync(`${this.config.sitemapPath}build-${buildNo}`, { recursive: true });
     console.log('Sitemap Build Started @ ' + buildNo);
@@ -248,7 +248,7 @@ class sitemapBFramework {
       await this.sitemapEachBuild(sitemapName + '.json', 'sitemap-01.xml', buildNo, 'webpages');
       for (let i = 0; i < configDataJSON.sitemapIndex.length; i++) {
         const name = this.sitemapNameCheck(configDataJSON.sitemapIndex[i].name);
-        if(configDataJSON.sitemapIndex[i].build_deploy){
+        if (configDataJSON.sitemapIndex[i].build_deploy) {
           await this.sitemapEachBuild(name + '.json', name + '.xml', buildNo, configDataJSON.sitemapIndex[i].type || 'webpages');
         }
       }
@@ -438,7 +438,7 @@ class sitemapBFramework {
 
   limitCheck(limit = this.config.maxLinksPerSitemap) {
     limit = parseInt(limit);
-    if(isNaN(limit)) limit = this.config.maxLinksPerSitemap;
+    if (isNaN(limit)) limit = this.config.maxLinksPerSitemap;
     if (limit && (limit < 0 || limit > this.config.maxLinksPerSitemap)) this.throwError(`Max limit cannot exceed set limit of ${this.config.maxLinksPerSitemap}`);
     return limit || this.config.maxLinksPerSitemap;
   }
