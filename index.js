@@ -3,6 +3,7 @@ const _ = require('lodash');
 const moment = require('moment');
 const { create } = require('xmlbuilder2');
 const cron = require('node-cron');
+const del = require('del');
 
 class sitemapBFramework {
 
@@ -39,7 +40,7 @@ class sitemapBFramework {
   }
 
 
-  async sitemapIndexAdd(sitemapName, loc, type = 'webpages', limit = this.config.maxLinksPerSitemap, locked = false) {
+  async sitemapIndexAdd(sitemapName, loc, type = 'webpages', limit = this.config.maxLinksPerSitemap, locked = false, build_deploy = true) {
     let configDataJSON = await this.loadFile(this.config.configDataJSON, true, 'json', { data: {}, sitemapIndex: [] });
     sitemapName = this.sitemapNameCheck(sitemapName);
     const indexPosition = _.findIndex(configDataJSON.sitemapIndex, ['name', sitemapName]);
@@ -53,6 +54,7 @@ class sitemapBFramework {
       limit: this.limitCheck(limit),
       locked: this.lockedCheck(locked),
       type: this.typeCheck(type),
+      build_deploy: this.build_deployCheck(build_deploy),
       lastUpdated: new Date()
     };
     configDataJSON.sitemapIndex.push(data);
@@ -61,7 +63,7 @@ class sitemapBFramework {
     return { data, status: 200 };
   }
 
-  async sitemapIndexUpdate(sitemapName, loc, type = 'webpages', limit = this.config.maxLinksPerSitemap, locked = false) {
+  async sitemapIndexUpdate(sitemapName, loc, type = 'webpages', limit = this.config.maxLinksPerSitemap, locked = false, build_deploy = true) {
     let configDataJSON = await this.loadFile(this.config.configDataJSON, true, 'json', { data: {}, sitemapIndex: [] });
     sitemapName = this.sitemapNameCheck(sitemapName);
     const indexPosition = _.findIndex(configDataJSON.sitemapIndex, ['name', sitemapName]);
@@ -73,6 +75,7 @@ class sitemapBFramework {
       limit: this.limitCheck(limit),
       locked: this.lockedCheck(locked),
       type: this.typeCheck(type),
+      build_deploy: this.build_deployCheck(build_deploy),
       lastUpdated: new Date()
     };
     configDataJSON.sitemapIndex[indexPosition] = data;
@@ -232,6 +235,8 @@ class sitemapBFramework {
   async sitemapBuildAndDeploy() {
     const configDataJSON = await this.loadFile(this.config.configDataJSON, true, 'json', { data: {}, sitemapIndex: [] });
     const buildNo = Date.now();
+    await del([this.config.sitemapPath + 'build']);
+    fs.mkdirSync(this.config.sitemapPath + 'build', { recursive: true });
     fs.mkdirSync(`${this.config.sitemapPath}build-${buildNo}`, { recursive: true });
     console.log('Sitemap Build Started @ ' + buildNo);
     if (configDataJSON.sitemapIndex.length <= 0) {
@@ -243,11 +248,13 @@ class sitemapBFramework {
       await this.sitemapEachBuild(sitemapName + '.json', 'sitemap-01.xml', buildNo, 'webpages');
       for (let i = 0; i < configDataJSON.sitemapIndex.length; i++) {
         const name = this.sitemapNameCheck(configDataJSON.sitemapIndex[i].name);
-        await this.sitemapEachBuild(name + '.json', name + '.xml', buildNo, configDataJSON.sitemapIndex[i].type || 'webpages');
+        if(configDataJSON.sitemapIndex[i].build_deploy){
+          await this.sitemapEachBuild(name + '.json', name + '.xml', buildNo, configDataJSON.sitemapIndex[i].type || 'webpages');
+        }
       }
     }
     this.changes = false;
-    if (this.config.build.deployToBucket) {
+    if (this.config.build && this.config.build.deployToBucket) {
       this.DeployToBucket();
       return { data: `Sitemap Build Success, Deployment to Bucket in Background process @ '${this.config.sitemapPath}'`, status: 200 };
     }
@@ -441,6 +448,13 @@ class sitemapBFramework {
     if (locked == 'true') return true;
     if (locked == 'false') return false;
     this.throwError(`Locked State should be True or False`);
+  }
+
+  build_deployCheck(build_deployCheck = 'true') {
+    build_deployCheck = build_deployCheck.toString().toLowerCase();
+    if (build_deployCheck == 'true') return true;
+    if (build_deployCheck == 'false') return false;
+    this.throwError(`Deploy State should be True or False`);
   }
 
   typeCheck(type = 'webpages') {
