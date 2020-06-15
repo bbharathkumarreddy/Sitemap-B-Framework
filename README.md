@@ -61,9 +61,10 @@ var SitemapBFramework = new sitemapBFramework(options);
  loc = location url
  type = webpages,news,image,video
  limit = 0 to 50000
- locked = true or false
+ locked = true or false // default false - Avoid inserting ,updating or deleting a sitemap items.
+ build_deploy = true or false // default true - Make to false once deployed for very large or not mostly changing sitemap files. 
  */
- await SitemapBFramework.sitemapIndexAdd('sitemap-products','https://sitemap/sitemap-products.xml','webpages',50000,false);
+ await SitemapBFramework.sitemapIndexAdd('sitemap-products','https://sitemap/sitemap-products.xml','webpages',50000,false, true);
 
  /*
  Add sitemap links to each sitemap file
@@ -139,12 +140,12 @@ const options = {
 ### Methods Available
 ```js
 
- //sitemapIndexAdd(sitemapName, loc, type @optional, limit @optional, locked @optional);
- sitemapIndexAdd('sitemap-products', 'https://sitemap/sitemap-products.xml', 'webpages', 50000, false);
+ //sitemapIndexAdd(sitemapName, loc, type @optional, limit @optional, locked @optional, build_deploy @optional);
+ sitemapIndexAdd('sitemap-products', 'https://sitemap/sitemap-products.xml', 'webpages', 50000, false, true);
 
  
- //sitemapIndexUpdate(sitemapName, loc, type @optional, limit @optional, locked @optional);
- sitemapIndexUpdate('sitemap-products', 'https://sitemap/sitemap-products-new.xml', 'webpages', 50000, false);
+ //sitemapIndexUpdate(sitemapName, loc, type @optional, limit @optional, locked @optional, build_deploy @optional);
+ sitemapIndexUpdate('sitemap-products', 'https://sitemap/sitemap-products-new.xml', 'webpages', 50000, false, true);
 
 
  //sitemapIndexDelete(sitemapName);

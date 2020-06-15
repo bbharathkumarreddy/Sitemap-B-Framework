@@ -1,6 +1,6 @@
 {
   "name": "sitemap-b-framework",
-  "version": "1.1.8",
+  "version": "1.1.9",
   "description": "Advanced Sitemap Management, Generating & Deployment Framework",
   "main": "index.js",
   "scripts": {
@@ -15,6 +15,7 @@
     "video-sitemap",
     "google-sitmap",
     "seo-sitemap",
+    "sitemap-framework",
     "xml-sitemap"
   ],
   "repository": {
@@ -27,6 +28,7 @@
     "@google-cloud/storage": "^4.7.0",
     "aws-sdk": "^2.668.0",
     "body-parser": "^1.19.0",
+    "del": "^5.1.0",
     "express": "^4.17.1",
     "lodash": "^4.17.15",
     "moment": "^2.25.0",
