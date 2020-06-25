@@ -268,6 +268,7 @@ class sitemapBFramework {
       sitemapIndexXMLUP.ele('sitemap').ele('loc').txt(element.loc).up();
     });
     const xml = sitemapIndexXML.end({ prettyPrint: true });
+    console.log(`sitemap build success=> sitemap.xml`);
     fs.writeFileSync(`${this.config.sitemapPath}build/sitemap.xml`, xml);
     fs.writeFileSync(`${this.config.sitemapPath}build-${buildNo}/sitemap.xml`, xml);
     return true;
@@ -290,6 +291,7 @@ class sitemapBFramework {
       });
     }
     const xml = sitemapXML.end({ prettyPrint: true });
+    console.log(`sitemap build success=> ${buildName}`);
     fs.writeFileSync(`${this.config.sitemapPath}build/${buildName}`, xml);
     fs.writeFileSync(`${this.config.sitemapPath}build-${buildNo}/${buildName}`, xml);
     return true;
@@ -310,6 +312,7 @@ class sitemapBFramework {
         if (!_.get(this.config, 'build.deployToBucket.gcs.bucket')) { console.error('gcs is defined, config.build.deployToBucket.gcs.bucket Missing '); return false; }
       }
       if (mode == 's3') {
+        console.log(`sitemap deploy to s3 started`);
         const AWS = require('aws-sdk');
         const s3 = new AWS.S3({
           accessKeyId: this.config.build.deployToBucket.s3.accessKeyId,
@@ -332,6 +335,7 @@ class sitemapBFramework {
           });
         });
       } else if (mode == 'gcs') {
+        console.log(`sitemap deploy to gcs started`);
         const { Storage } = require('@google-cloud/storage')
         const storage = new Storage({
           projectId: this.config.build.deployToBucket.gcs.projectId,
