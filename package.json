@@ -16,7 +16,8 @@
     "google-sitmap",
     "seo-sitemap",
     "sitemap-framework",
-    "xml-sitemap"
+    "xml-sitemap",
+    "sitemap-on-bucket"
   ],
   "repository": {
     "type": "git",
