@@ -384,7 +384,7 @@ class sitemapBFramework {
           const fileContent = fs.readFileSync(this.config.sitemapPath + 'build/' + file);
           const params = {
             Bucket: this.config.backup.bakcupToBucket.s3.bucket,
-            Key: this.config.backup.bakcupToBucket.s3.path + 'sitemapbck-' + BackupNo + '/sitemap-xml/' + file,
+            Key: this.config.backup.bakcupToBucket.s3.path + 'sitemapbck-' + BackupNo + '/sitemap-xml/build/' + file,
             Body: fileContent
           };
           s3.upload(params, function (err, data) {
@@ -414,7 +414,7 @@ class sitemapBFramework {
         }
         fs.readdirSync(this.config.sitemapPath + 'build').forEach(async (file) => {
           await storage.bucket(this.config.backup.bakcupToBucket.gcs.bucket).upload(this.config.sitemapPath + 'build/' + file, {
-            destination: this.config.backup.bakcupToBucket.gcs.path + 'sitemapbck-' + BackupNo + '/sitemap-xml/' + file,
+            destination: this.config.backup.bakcupToBucket.gcs.path + 'sitemapbck-' + BackupNo + '/sitemap-xml/build/' + file,
             gzip: true,
           });
         });
