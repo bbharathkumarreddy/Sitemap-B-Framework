@@ -168,19 +168,19 @@ const options = {
  sitemapItemDelete('https://example.com/product/laptop-trending', 'sitemap-products', );
 
 
- //sitemapItemList(sitemapName @optional)
+ //sitemapItemList(sitemapName @optional);
  sitemapItemList('sitemap-products');
  
 
- //sitemapGlobalSearch(loc)
+ //sitemapGlobalSearch(loc);
  sitemapGlobalSearch('https://example.com/product/laptop-trending');
 
 
- //sitemapBuildAndDeploy()
+ //sitemapBuildAndDeploy();
  sitemapBuildAndDeploy();
 
 
- //BackupToBucket()
+ //BackupToBucket();
  BackupToBucket();
 
 ```
