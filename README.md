@@ -1,3 +1,4 @@
+![Node.js Package](https://github.com/bbharathkumarreddy/Sitemap-B-Framework/workflows/Node.js%20Package/badge.svg?branch=master)
 # Sitemap B Framework
 Advanced Sitemap Management, Generating & Deployment Framework [Open Source]
 
