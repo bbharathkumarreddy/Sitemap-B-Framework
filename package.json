@@ -1,6 +1,6 @@
 {
   "name": "sitemap-b-framework",
-  "version": "1.2.6",
+  "version": "1.2.7",
   "description": "Advanced Sitemap Management, Generating & Deployment Framework",
   "main": "index.js",
   "scripts": {
